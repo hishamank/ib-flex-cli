@@ -130,6 +130,50 @@ export class Store {
     return rows.map((r) => JSON.parse(r.data) as Row);
   }
 
+  /**
+   * Keep only the latest `keepPerQuery` snapshots (batches) per query; delete
+   * older rows and fetch_log entries, then reclaim disk with VACUUM. Returns the
+   * number of cached data rows removed. Each `save()` only ever appends, so this
+   * is the intended way to bound the database's growth.
+   */
+  prune(keepPerQuery: number): number {
+    if (!Number.isInteger(keepPerQuery) || keepPerQuery < 1) {
+      throw new Error("keepPerQuery must be a positive integer");
+    }
+
+    const tx = this.db.transaction(() => {
+      const queries = (
+        this.db.prepare(`SELECT DISTINCT query FROM fetch_log`).all() as { query: string }[]
+      ).map((q) => q.query);
+
+      let deleted = 0;
+      for (const query of queries) {
+        // The oldest batch we keep is the keepPerQuery-th newest; anything in a
+        // strictly older batch is removed. OFFSET past the end -> keep all.
+        const cutoff = this.db
+          .prepare(
+            `SELECT DISTINCT batch FROM fetch_log WHERE query = ?
+             ORDER BY batch DESC LIMIT 1 OFFSET ?`
+          )
+          .get(query, keepPerQuery - 1) as { batch: number } | undefined;
+
+        if (!cutoff) continue;
+
+        deleted += this.db
+          .prepare(`DELETE FROM rows WHERE query = ? AND batch < ?`)
+          .run(query, cutoff.batch).changes;
+        this.db
+          .prepare(`DELETE FROM fetch_log WHERE query = ? AND batch < ?`)
+          .run(query, cutoff.batch);
+      }
+      return deleted;
+    });
+
+    const deleted = tx();
+    this.db.exec("VACUUM"); // must run outside a transaction
+    return deleted;
+  }
+
   close(): void {
     this.db.close();
   }

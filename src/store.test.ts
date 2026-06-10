@@ -70,3 +70,32 @@ test("two saves in the same millisecond stay distinct batches", () => {
     assert.deepEqual(store.latestSection("OpenPositions", "positions"), [{ symbol: "MSFT" }]);
   });
 });
+
+test("prune keeps the latest N snapshots per query and drops older ones", () => {
+  withStore((store) => {
+    for (let i = 1; i <= 5; i++) {
+      store.save("positions", snapshot("OpenPositions", [{ symbol: "S" + i }]));
+    }
+    store.save("cash", snapshot("CashTransactions", [{ amount: "1" }]));
+
+    const deleted = store.prune(2); // keep S4, S5 -> drop S1, S2, S3
+    assert.equal(deleted, 3);
+    assert.deepEqual(store.latestSection("OpenPositions", "positions"), [{ symbol: "S5" }]);
+    // a different query with fewer than N snapshots is untouched
+    assert.deepEqual(store.latestSection("CashTransactions", "cash"), [{ amount: "1" }]);
+  });
+});
+
+test("prune is a no-op when there are fewer than keep snapshots", () => {
+  withStore((store) => {
+    store.save("positions", snapshot("OpenPositions", [{ symbol: "AAPL" }]));
+    assert.equal(store.prune(10), 0);
+    assert.deepEqual(store.latestSection("OpenPositions", "positions"), [{ symbol: "AAPL" }]);
+  });
+});
+
+test("prune rejects a non-positive keep", () => {
+  withStore((store) => {
+    assert.throws(() => store.prune(0), /positive integer/);
+  });
+});

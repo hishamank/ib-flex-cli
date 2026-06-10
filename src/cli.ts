@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { setTimeout as sleep } from "node:timers/promises";
 import { Command } from "commander";
-import { loadConfig, type AppConfig } from "./config.js";
+import { loadConfig, resolveDbPath, type AppConfig } from "./config.js";
 import { fetchRaw, type DateRange } from "./flex/client.js";
 import { parseQuery, getSection, type ParsedQuery } from "./flex/parse.js";
 import { Store } from "./store.js";
@@ -180,6 +180,26 @@ viewCommand(
   ["symbol", "exDate", "payDate", "grossRate", "grossAmount", "netAmount", "currency"],
   "open dividend accruals"
 );
+
+// ---- prune ---------------------------------------------------------------
+program
+  .command("prune")
+  .option("--keep <n>", "snapshots to keep per query", "10")
+  .description("delete old cached snapshots, keeping the latest N per query")
+  .action((opts: { keep: string }) => {
+    const keep = Number.parseInt(opts.keep, 10);
+    if (!Number.isInteger(keep) || keep < 1) {
+      throw new Error(`--keep must be a positive integer, got "${opts.keep}"`);
+    }
+    // Purely a local DB operation, so no token/config required.
+    const store = new Store(resolveDbPath(globals().db));
+    try {
+      const deleted = store.prune(keep);
+      console.error(`Pruned ${deleted} cached rows (kept latest ${keep} per query).`);
+    } finally {
+      store.close();
+    }
+  });
 
 // ---- sections overview ---------------------------------------------------
 program

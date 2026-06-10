@@ -15,6 +15,11 @@ export interface AppConfig {
   dbPath: string;
 }
 
+/** Resolve the sqlite path: explicit override, then env, then default. */
+export function resolveDbPath(override?: string): string {
+  return override ?? process.env.IB_FLEX_DB ?? "ib-flex.db";
+}
+
 /**
  * Loads the Flex token from the environment (never from the config file, so the
  * file can be committed safely) and the query registry from config.json.
@@ -54,6 +59,6 @@ export function loadConfig(): AppConfig {
   return {
     token,
     queries,
-    dbPath: process.env.IB_FLEX_DB ?? "ib-flex.db",
+    dbPath: resolveDbPath(),
   };
 }
