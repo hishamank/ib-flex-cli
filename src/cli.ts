@@ -2,7 +2,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { Command } from "commander";
 import { loadConfig, type AppConfig } from "./config.js";
-import { fetchRaw } from "./flex/client.js";
+import { fetchRaw, type DateRange } from "./flex/client.js";
 import { parseQuery, getSection, type ParsedQuery } from "./flex/parse.js";
 import { Store } from "./store.js";
 import { printJson, printTable } from "./format.js";
@@ -22,14 +22,35 @@ function globals() {
   return { json: !!o.json, live: !!o.live, db: o.db };
 }
 
-async function fetchQuery(cfg: AppConfig, name: string): Promise<ParsedQuery> {
+/** Build a Flex date range from CLI options, validating the yyyymmdd format. */
+function dateRange(opts: { from?: string; to?: string }): DateRange | undefined {
+  const check = (v: string | undefined, flag: string): string | undefined => {
+    if (v === undefined) return undefined;
+    if (!/^\d{8}$/.test(v)) {
+      throw new Error(`${flag} must be yyyymmdd (e.g. 20250131), got "${v}"`);
+    }
+    return v;
+  };
+  const from = check(opts.from, "--from");
+  const to = check(opts.to, "--to");
+  return from || to ? { from, to } : undefined;
+}
+
+async function fetchQuery(
+  cfg: AppConfig,
+  name: string,
+  range?: DateRange
+): Promise<ParsedQuery> {
   const q = cfg.queries[name];
   if (!q) {
     throw new Error(
       `Unknown query "${name}". Configured: ${Object.keys(cfg.queries).join(", ")}`
     );
   }
-  const xml = await fetchRaw(cfg.token, q.id);
+  // q.type (activity vs trade_confirmation) is advisory only: the Flex Web
+  // Service uses the same SendRequest endpoint for both and infers the type
+  // from the query id server-side, so it isn't passed here.
+  const xml = await fetchRaw(cfg.token, q.id, range);
   return parseQuery(xml);
 }
 
@@ -38,9 +59,12 @@ program
   .command("sync")
   .argument("[query]", "query name; omit and pass --all to sync everything")
   .option("--all", "sync every configured query")
+  .option("--from <yyyymmdd>", "start date (defaults to the query's saved period)")
+  .option("--to <yyyymmdd>", "end date")
   .description("fetch from IBKR and cache to sqlite")
-  .action(async (query: string | undefined, opts: { all?: boolean }) => {
+  .action(async (query: string | undefined, opts: { all?: boolean; from?: string; to?: string }) => {
     const cfg = loadConfig();
+    const range = dateRange(opts);
     const store = new Store(globals().db ?? cfg.dbPath);
     try {
       const names = opts.all ? Object.keys(cfg.queries) : query ? [query] : [];
@@ -52,7 +76,7 @@ program
       for (const name of names) {
         process.stderr.write(`Syncing ${name} ... `);
         try {
-          const parsed = await fetchQuery(cfg, name);
+          const parsed = await fetchQuery(cfg, name, range);
           const n = store.save(name, parsed);
           console.error(`${n} rows`);
         } catch (e) {
@@ -77,10 +101,12 @@ program
   .command("raw")
   .argument("<query>", "query name")
   .option("--full", "print every row, not just a section summary")
-  .description("fetch a query and show every section it returns")
-  .action(async (query: string, opts: { full?: boolean }) => {
+  .option("--from <yyyymmdd>", "start date")
+  .option("--to <yyyymmdd>", "end date")
+  .description("fetch a query live and show every section it returns (always bypasses the cache)")
+  .action(async (query: string, opts: { full?: boolean; from?: string; to?: string }) => {
     const cfg = loadConfig();
-    const parsed = await fetchQuery(cfg, query);
+    const parsed = await fetchQuery(cfg, query, dateRange(opts));
     if (opts.full) {
       printJson(parsed);
       return;
