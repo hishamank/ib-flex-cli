@@ -1,0 +1,14 @@
+{
+  "_comment": "Copy to config.json. Fill 'id' with the Query ID shown in the IBKR portal for each saved Flex Query. 'type' is 'activity' or 'trade_confirmation'. You don't have to create all of these on day one - only the queries whose 'id' you fill in will be used.",
+  "queries": {
+    "account":     { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "positions":   { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "trades":      { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "cash":        { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "income":      { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "performance": { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "fx":          { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "lending":     { "id": "REPLACE_WITH_QUERY_ID", "type": "activity" },
+    "fills":       { "id": "REPLACE_WITH_QUERY_ID", "type": "trade_confirmation" }
+  }
+}
