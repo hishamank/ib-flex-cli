@@ -48,12 +48,24 @@ program
         console.error("Specify a query name or use --all.");
         process.exit(1);
       }
+      let failed = 0;
       for (const name of names) {
         process.stderr.write(`Syncing ${name} ... `);
-        const parsed = await fetchQuery(cfg, name);
-        const n = store.save(name, parsed);
-        console.error(`${n} rows`);
+        try {
+          const parsed = await fetchQuery(cfg, name);
+          const n = store.save(name, parsed);
+          console.error(`${n} rows`);
+        } catch (e) {
+          // Isolate failures so one bad query (timeout, wrong id) doesn't abort
+          // the rest of an --all run.
+          failed++;
+          console.error(`failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
         await sleep(1500); // respect the ~1 request/second rate limit
+      }
+      if (failed > 0) {
+        console.error(`${failed} of ${names.length} queries failed.`);
+        process.exitCode = 1;
       }
     } finally {
       store.close();
