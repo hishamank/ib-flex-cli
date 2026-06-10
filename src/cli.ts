@@ -99,8 +99,10 @@ function viewCommand(
       const { json, live, db } = globals();
       const store = new Store(db ?? cfg.dbPath);
       try {
-        let rows = live ? [] : store.latestSection(section, queryName);
-        if (rows.length === 0) {
+        // null = nothing cached for this query (miss); [] = synced but the
+        // section is empty (a valid hit). Only a true miss hits the network.
+        let rows = live ? null : store.latestSection(section, queryName);
+        if (rows === null) {
           const parsed = await fetchQuery(cfg, queryName);
           if (!live) store.save(queryName, parsed);
           rows = parsed.statements.flatMap((s) => getSection(s, section));
