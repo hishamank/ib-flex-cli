@@ -55,29 +55,43 @@ XML, so the tool covers all sections without a hand-written parser per section.
 npm install
 cp .env.example .env          # add IB_FLEX_TOKEN (gitignored, never commit)
 cp config.example.json config.json   # fill in each Query ID
-npm run build                 # or use `npm run dev -- <command>` via tsx
+npm run build                 # compile to dist/
+npm link                      # optional: put `ib` on your PATH
 ```
+
+The `ib …` examples below assume you ran `npm link` (or installed globally).
+Without it, run any command through tsx instead: `npm run dev -- <command>`
+(e.g. `npm run dev -- positions --json`). Run `npm test` to execute the suite.
 
 ## Usage
 
 ```bash
 ib sync --all          # fetch every configured query into the cache
 ib sync positions      # fetch just one
+ib sync trades --from 20250101 --to 20250131   # override the query's date range
 
 ib positions           # pretty table of holdings + unrealized P/L
 ib trades              # executed trades
 ib cash                # deposits / withdrawals / dividends / fees
 ib dividends           # dividend accruals
 
-ib raw cash            # every section a query returns, with row counts
+ib raw cash            # every section a query returns, with row counts (always live)
 ib raw cash --full     # full parsed JSON (use this to discover real section names)
 ib sections            # what each configured query should contain
+
+ib prune               # drop old cached snapshots, keeping the latest 10 per query
+ib prune --keep 3      # keep fewer; bounds the sqlite cache size
 
 # global flags
 ib positions --json    # JSON instead of a table (pipe into jq, etc.)
 ib positions --live    # skip cache, fetch fresh
 ib --db ./my.db sync --all
 ```
+
+`--from`/`--to` take `yyyymmdd` and are available on `sync` and `raw`; omit
+them to use the query's saved period. A daily `ib sync --all` grows the cache
+over time, so run `ib prune` periodically (it keeps the latest N snapshots per
+query and reclaims disk).
 
 Tip: `ib raw <query> --full` shows the **actual** XML element names your
 account returns. If a friendly view shows "(no rows)", the section's real
