@@ -2,6 +2,24 @@
   "name": "ib-flex-cli",
   "version": "0.1.0",
   "description": "CLI for pulling IBKR portfolio data via the Flex Web Service",
+  "license": "MIT",
+  "author": "Hicham Kazan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hishamank/ib-flex-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hishamank/ib-flex-cli/issues"
+  },
+  "homepage": "https://github.com/hishamank/ib-flex-cli#readme",
+  "keywords": [
+    "ibkr",
+    "interactive-brokers",
+    "flex",
+    "flex-query",
+    "portfolio",
+    "cli"
+  ],
   "type": "module",
   "bin": {
     "ib": "dist/cli.js"

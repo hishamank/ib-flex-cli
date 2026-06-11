@@ -114,3 +114,13 @@ the `section` argument in `src/cli.ts` to match.
 - Portfolio analytics: yield-on-cost, projected annual income, FX-adjusted
   total return.
 - Optional Client Portal Web API module if live open orders are ever needed.
+
+## License & disclaimer
+
+MIT — see [LICENSE](LICENSE).
+
+This is an independent, unofficial tool. It is **not affiliated with, endorsed
+by, or supported by Interactive Brokers**. "Interactive Brokers", "IBKR", and
+"Flex" are trademarks of Interactive Brokers LLC. Provided "as is", with no
+warranty; it is not financial advice. Always verify figures against your
+official IBKR statements, and use within Interactive Brokers' API terms.
