@@ -9,6 +9,10 @@ live working/open orders. (Open orders would need the Client Portal Web API,
 which is out of scope here.) Activity data refreshes once daily at close;
 Trade Confirmation data refreshes intraday with a short delay.
 
+> **New here?** Follow the step-by-step [**setup guide**](SETUP.md) — it walks
+> through generating the IBKR token, creating Flex Queries, installing, and
+> configuring, with troubleshooting. The sections below are the quick reference.
+
 ## How it works
 
 The Flex Web Service is a two-call flow:
