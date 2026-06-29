@@ -10,7 +10,7 @@ import { QUERY_BLUEPRINT } from "./sections.js";
 
 const program = new Command();
 program
-  .name("ib")
+  .name("ibkr")
   .description("Pull IBKR portfolio data via the Flex Web Service")
   .version("0.1.0")
   .option("--json", "output raw JSON instead of tables")

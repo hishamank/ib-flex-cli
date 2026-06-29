@@ -115,13 +115,13 @@ cd ib-flex-cli
 
 pnpm install         # installs deps and compiles the native sqlite module
 pnpm build           # compile TypeScript to dist/
-pnpm link --global   # optional: puts the `ib` command on your PATH
+pnpm link --global   # optional: puts the `ibkr` command on your PATH
 ```
 
 - If `pnpm link --global` fails on a permissions error, you can skip it and run
-  every command as `pnpm ib <command>` instead (e.g. `pnpm ib positions`).
-  Note: with pnpm there is **no** `--` separator — write `pnpm ib sync --all`,
-  not `pnpm ib -- sync --all`.
+  every command as `pnpm ibkr <command>` instead (e.g. `pnpm ibkr positions`).
+  Note: with pnpm there is **no** `--` separator — write `pnpm ibkr sync --all`,
+  not `pnpm ibkr -- sync --all`.
 - Sanity check: `pnpm test` should print `pass 16`.
 
 ---
@@ -167,9 +167,9 @@ ID are used.
 ## Part 4 — First sync and verify
 
 ```bash
-ib sync --all      # fetch every configured query into the local cache
-ib positions       # pretty table of holdings + unrealized P/L
-ib trades          # executed trades
+ibkr sync --all      # fetch every configured query into the local cache
+ibkr positions       # pretty table of holdings + unrealized P/L
+ibkr trades          # executed trades
 ```
 
 Reports take a few seconds to generate — the CLI polls until they're ready, so
@@ -181,8 +181,8 @@ the most common XML element names, which can differ by account/region. If a view
 says `(no rows)` but you expect data:
 
 ```bash
-ib raw positions          # lists every section the query returned + row counts
-ib raw positions --full   # full JSON, so you can see the real element names
+ibkr raw positions          # lists every section the query returned + row counts
+ibkr raw positions --full   # full JSON, so you can see the real element names
 ```
 
 If the real section name differs from the default, update `src/sections.ts` and
@@ -201,7 +201,7 @@ the `section` argument in `src/cli.ts` to match.
 | `Flex error 1013` | The token is IP-restricted and your current IP doesn't match. |
 | `Flex error 1018` | Rate limited. Wait a bit; `sync` already paces itself at ~1 req/sec. |
 | `Statement … not ready after N attempts` | IBKR is taking unusually long to generate; re-run, or split a large query into smaller ones. |
-| `(no rows)` in a friendly view | The section's real element name differs — use `ib raw <query> --full` to find it (see Part 4). |
+| `(no rows)` in a friendly view | The section's real element name differs — use `ibkr raw <query> --full` to find it (see Part 4). |
 | native build error on `pnpm install` | Install your platform's C/C++ build tools, then `pnpm install` again. |
 
 Flex error codes and messages are surfaced verbatim in the CLI's error output,
@@ -222,6 +222,6 @@ so you can look up any code not listed here in IBKR's documentation.
 
 ## Keeping it healthy
 
-- A daily `ib sync --all` grows the cache over time — run `ib prune` periodically
+- A daily `ibkr sync --all` grows the cache over time — run `ibkr prune` periodically
   (keeps the latest 10 snapshots per query; `--keep N` to change).
 - Set a calendar reminder to rotate the token ~11 months out.

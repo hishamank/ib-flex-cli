@@ -23,11 +23,11 @@
   "type": "module",
   "packageManager": "pnpm@10.28.1",
   "bin": {
-    "ib": "dist/cli.js"
+    "ibkr": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
-    "ib": "tsx src/cli.ts",
+    "ibkr": "tsx src/cli.ts",
     "dev": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\""

@@ -60,46 +60,46 @@ pnpm install
 cp .env.example .env          # add IB_FLEX_TOKEN (gitignored, never commit)
 cp config.example.json config.json   # fill in each Query ID
 pnpm build                    # compile to dist/
-pnpm link --global            # optional: put `ib` on your PATH
+pnpm link --global            # optional: put `ibkr` on your PATH
 ```
 
-The `ib …` examples below assume you ran `pnpm link --global` (or installed
+The `ibkr …` examples below assume you ran `pnpm link --global` (or installed
 globally). Without it, run any command through the bundled script instead:
-`pnpm ib <command>` (e.g. `pnpm ib positions --json`). Note there is **no** `--`
-separator with pnpm — write `pnpm ib sync --all`, not `pnpm ib -- sync --all`.
+`pnpm ibkr <command>` (e.g. `pnpm ibkr positions --json`). Note there is **no** `--`
+separator with pnpm — write `pnpm ibkr sync --all`, not `pnpm ibkr -- sync --all`.
 Run `pnpm test` to execute the suite.
 
 ## Usage
 
 ```bash
-ib sync --all          # fetch every configured query into the cache
-ib sync positions      # fetch just one
-ib sync trades --from 20250101 --to 20250131   # override the query's date range
+ibkr sync --all          # fetch every configured query into the cache
+ibkr sync positions      # fetch just one
+ibkr sync trades --from 20250101 --to 20250131   # override the query's date range
 
-ib positions           # pretty table of holdings + unrealized P/L
-ib trades              # executed trades
-ib cash                # deposits / withdrawals / dividends / fees
-ib dividends           # dividend accruals
+ibkr positions           # pretty table of holdings + unrealized P/L
+ibkr trades              # executed trades
+ibkr cash                # deposits / withdrawals / dividends / fees
+ibkr dividends           # dividend accruals
 
-ib raw cash            # every section a query returns, with row counts (always live)
-ib raw cash --full     # full parsed JSON (use this to discover real section names)
-ib sections            # what each configured query should contain
+ibkr raw cash            # every section a query returns, with row counts (always live)
+ibkr raw cash --full     # full parsed JSON (use this to discover real section names)
+ibkr sections            # what each configured query should contain
 
-ib prune               # drop old cached snapshots, keeping the latest 10 per query
-ib prune --keep 3      # keep fewer; bounds the sqlite cache size
+ibkr prune               # drop old cached snapshots, keeping the latest 10 per query
+ibkr prune --keep 3      # keep fewer; bounds the sqlite cache size
 
 # global flags
-ib positions --json    # JSON instead of a table (pipe into jq, etc.)
-ib positions --live    # skip cache, fetch fresh
-ib --db ./my.db sync --all
+ibkr positions --json    # JSON instead of a table (pipe into jq, etc.)
+ibkr positions --live    # skip cache, fetch fresh
+ibkr --db ./my.db sync --all
 ```
 
 `--from`/`--to` take `yyyymmdd` and are available on `sync` and `raw`; omit
-them to use the query's saved period. A daily `ib sync --all` grows the cache
-over time, so run `ib prune` periodically (it keeps the latest N snapshots per
+them to use the query's saved period. A daily `ibkr sync --all` grows the cache
+over time, so run `ibkr prune` periodically (it keeps the latest N snapshots per
 query and reclaims disk).
 
-Tip: `ib raw <query> --full` shows the **actual** XML element names your
+Tip: `ibkr raw <query> --full` shows the **actual** XML element names your
 account returns. If a friendly view shows "(no rows)", the section's real
 element name probably differs from the default — update `src/sections.ts` and
 the `section` argument in `src/cli.ts` to match.
