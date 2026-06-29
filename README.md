@@ -56,16 +56,18 @@ XML, so the tool covers all sections without a hand-written parser per section.
 ## Install & configure
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env          # add IB_FLEX_TOKEN (gitignored, never commit)
 cp config.example.json config.json   # fill in each Query ID
-npm run build                 # compile to dist/
-npm link                      # optional: put `ib` on your PATH
+pnpm build                    # compile to dist/
+pnpm link --global            # optional: put `ib` on your PATH
 ```
 
-The `ib …` examples below assume you ran `npm link` (or installed globally).
-Without it, run any command through tsx instead: `npm run dev -- <command>`
-(e.g. `npm run dev -- positions --json`). Run `npm test` to execute the suite.
+The `ib …` examples below assume you ran `pnpm link --global` (or installed
+globally). Without it, run any command through the bundled script instead:
+`pnpm ib <command>` (e.g. `pnpm ib positions --json`). Note there is **no** `--`
+separator with pnpm — write `pnpm ib sync --all`, not `pnpm ib -- sync --all`.
+Run `pnpm test` to execute the suite.
 
 ## Usage
 

@@ -24,7 +24,8 @@ CLI caches it locally in SQLite.
 ## Prerequisites
 
 - An **Interactive Brokers account** with web/portal access.
-- **Node.js ≥ 18** and npm — check with `node -v`. ([Install Node](https://nodejs.org/))
+- **Node.js ≥ 18** — check with `node -v`. ([Install Node](https://nodejs.org/))
+- **pnpm** — check with `pnpm -v`. ([Install pnpm](https://pnpm.io/installation), e.g. `corepack enable pnpm`)
 - **git**.
 - A C/C++ toolchain for the native `better-sqlite3` build (most machines already
   have it: Xcode Command Line Tools on macOS, `build-essential` on Linux).
@@ -112,14 +113,16 @@ report you created**.
 git clone https://github.com/hishamank/ib-flex-cli.git
 cd ib-flex-cli
 
-npm install        # installs deps and compiles the native sqlite module
-npm run build      # compile TypeScript to dist/
-npm link           # optional: puts the `ib` command on your PATH
+pnpm install         # installs deps and compiles the native sqlite module
+pnpm build           # compile TypeScript to dist/
+pnpm link --global   # optional: puts the `ib` command on your PATH
 ```
 
-- If `npm link` fails on a permissions error, you can skip it and run every
-  command as `npm run dev -- <command>` instead (e.g. `npm run dev -- positions`).
-- Sanity check: `npm test` should print `pass 16`.
+- If `pnpm link --global` fails on a permissions error, you can skip it and run
+  every command as `pnpm ib <command>` instead (e.g. `pnpm ib positions`).
+  Note: with pnpm there is **no** `--` separator — write `pnpm ib sync --all`,
+  not `pnpm ib -- sync --all`.
+- Sanity check: `pnpm test` should print `pass 16`.
 
 ---
 
@@ -199,7 +202,7 @@ the `section` argument in `src/cli.ts` to match.
 | `Flex error 1018` | Rate limited. Wait a bit; `sync` already paces itself at ~1 req/sec. |
 | `Statement … not ready after N attempts` | IBKR is taking unusually long to generate; re-run, or split a large query into smaller ones. |
 | `(no rows)` in a friendly view | The section's real element name differs — use `ib raw <query> --full` to find it (see Part 4). |
-| native build error on `npm install` | Install your platform's C/C++ build tools, then `npm install` again. |
+| native build error on `pnpm install` | Install your platform's C/C++ build tools, then `pnpm install` again. |
 
 Flex error codes and messages are surfaced verbatim in the CLI's error output,
 so you can look up any code not listed here in IBKR's documentation.
