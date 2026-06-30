@@ -1,4 +1,4 @@
-# ib-flex-cli
+# ibkr-flex-cli
 
 A small TypeScript CLI that pulls your IBKR portfolio data through the
 **Flex Web Service** — positions, trades, cash, dividends, performance, FX, and
